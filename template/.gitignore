@@ -1,0 +1,18 @@
+# The workbase is the workspace root: company repos and scratch files sit beside these notes
+# but are never tracked here. Track only the workbase's own files.
+/*
+!/.gitignore
+!/AGENTS.md
+!/CLAUDE.md
+!/README.md
+!/connectors.md
+!/decisions.md
+!/glossary.md
+!/inbox.md
+!/links.md
+!/wins.md
+!/people/
+!/projects/
+!/systems/
+.DS_Store
+*.local.*

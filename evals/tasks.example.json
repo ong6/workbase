@@ -1,0 +1,10 @@
+[
+ {"id":"R1","kind":"read","prompt":"git push returns <a real error you hit>. What's the fix?","expect":["<a word only the recorded fix contains>"]},
+ {"id":"R2","kind":"read","prompt":"What phase is <an active project> in?","expect":["<phase>"]},
+ {"id":"R3","kind":"read","prompt":"Which features have I shipped so far? Just the list.","expect":["<feature A>","<feature B>"]},
+ {"id":"R4","kind":"read","prompt":"What did we decide about <a real decision>, and why?","expect":["<the decision's key term>"]},
+ {"id":"R5","kind":"read","prompt":"What's the doc link or token for <a doc>?","expect":["<token>"]},
+ {"id":"C1","kind":"write","prompt":"Note this down: today we decided <X>; <person> agreed.","file_hint":"decisions.md","expect":["<X keyword>"]},
+ {"id":"C2","kind":"write","prompt":"Log this win: <outcome> went from <a> to <b>.","file_hint":"wins.md","expect":["<a>","<b>"]},
+ {"id":"C3","kind":"write","prompt":"Remember: <ACRONYM> here means <meaning>.","file_hint":"glossary.md","expect":["<ACRONYM>"]}
+]

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Create a workbase for a job from template/, or adopt an existing workspace folder.
+# The workbase is the workspace root: company repos are cloned inside it and ignored by its git.
+# Guards: no remote matching WORKBASE_BLOCK_REMOTES, no nesting inside another git repo, never overwrite a file.
+set -euo pipefail
+
+usage() { echo "usage: new-workbase <dir> [--adopt] [--remote <company-git-url>] [--local]" >&2; exit 2; }
+[ $# -ge 1 ] || usage
+dest=$1; shift
+remote=""; adopt=0; local=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --remote) remote=${2:?--remote needs a URL}; shift 2 ;;
+    --adopt) adopt=1; shift ;;
+    --local) local=1; shift ;;
+    *) usage ;;
+  esac
+done
+
+here=$(cd "$(dirname "$0")/.." && pwd)
+
+# Personal remotes to refuse, space-separated regexes, e.g. WORKBASE_BLOCK_REMOTES="github.com[:/]yourname/"
+for pat in ${WORKBASE_BLOCK_REMOTES:-}; do
+  if [ -n "$remote" ] && printf '%s' "$remote" | grep -Eq "$pat"; then
+    echo "refusing: $remote matches WORKBASE_BLOCK_REMOTES; company data never goes to a personal remote" >&2; exit 1
+  fi
+done
+if [ $adopt = 1 ]; then
+  [ -d "$dest" ] || { echo "refusing: --adopt needs an existing folder" >&2; exit 1; }
+  [ -e "$dest/.git" ] && { echo "refusing: $dest is already a git repo" >&2; exit 1; }
+else
+  [ -e "$dest" ] && { echo "refusing: $dest already exists (use --adopt for a workspace folder)" >&2; exit 1; }
+  mkdir -p "$dest"
+fi
+dest=$(cd "$dest" && pwd)
+if top=$(git -C "$(dirname "$dest")" rev-parse --show-toplevel 2>/dev/null); then
+  echo "refusing: $dest is inside the git repo $top" >&2; exit 1
+fi
+
+today=$(date +%F); year=$(date +%Y)
+(cd "$here/template" && find . -type f) | sed 's|^\./||' | while read -r f; do
+  if [ ! -e "$dest/$f" ]; then
+    mkdir -p "$dest/$(dirname "$f")"
+    sed -e "s/{{DATE}}/$today/g" -e "s/{{YEAR}}/$year/g" "$here/template/$f" > "$dest/$f"
+    echo "  added $f"
+  else
+    echo "  kept existing $f"
+  fi
+done
+
+# One manual: CLAUDE.md is a link to AGENTS.md (Claude Code skips @imports from a parent folder).
+# An existing CLAUDE.md is folded into AGENTS.md first, word for word.
+if [ -L "$dest/CLAUDE.md" ]; then
+  echo "  kept existing CLAUDE.md link"
+elif [ -f "$dest/CLAUDE.md" ]; then
+  { echo; echo "## Workspace notes (moved from CLAUDE.md, $today)"; echo; cat "$dest/CLAUDE.md"; } >> "$dest/AGENTS.md"
+  rm "$dest/CLAUDE.md"; ln -s AGENTS.md "$dest/CLAUDE.md"
+  echo "  CLAUDE.md: folded into AGENTS.md, now a link to it"
+else
+  ln -s AGENTS.md "$dest/CLAUDE.md"; echo "  added CLAUDE.md -> AGENTS.md"
+fi
+
+git -C "$dest" init -q
+[ -n "$remote" ] && git -C "$dest" remote add origin "$remote"
+# --local: keep the company URL (so per-remote git identity rules and commit hooks still apply) but never push.
+[ $local = 1 ] && [ -n "$remote" ] && git -C "$dest" remote set-url --push origin no-push-local-only
+git -C "$dest" add -A
+# The machine's identity rules (email per remote, commit hooks) decide; never bypass them.
+if ! git -C "$dest" commit -qm "workbase: start $today"; then
+  echo "note: first commit skipped; set this company's git identity or remote, then commit" >&2
+fi
+echo "workbase ready at $dest${remote:+ (remote: $remote)}$([ $local = 1 ] && echo ", local only: pushes disabled")"
