@@ -2,6 +2,9 @@
 # but are never tracked here. Track only the workbase's own files.
 /*
 !/.gitignore
+!/.claude/
+/.claude/*
+!/.claude/skills/
 !/AGENTS.md
 !/CLAUDE.md
 !/README.md

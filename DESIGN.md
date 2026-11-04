@@ -76,6 +76,16 @@ that were used were chores: fetching docs, deploying, writing requirement change
 spec, driving a browser.
 **Would change if.** Nothing; this is the rule.
 
+### One bundled skill: council
+`council` ships in the template. It runs only when asked ("use the council"): fresh reviewer
+subagents with different lenses agree on metrics, score the work out of 10, and the main session
+fixes and rescores until every member reaches the target (default 8, at most 3 rounds).
+**Why.** It packages a way of working that is hard to rebuild ad hoc: metrics chosen by the agents,
+reference comparisons, a target the reviewers never see, fresh reviewers each round. It is
+explicit-only, so it costs nothing until called. Its scores are model opinion, not evidence; the
+skill says so and keeps the user as the final judge.
+**Would change if.** It goes unused for 30 days of active work, like any other skill.
+
 ### Keep the feature lifecycle light
 One project folder per piece of work: goal, links, requirement changes, status. The one gate worth
 keeping is that requirement changes are written back into the spec before release.

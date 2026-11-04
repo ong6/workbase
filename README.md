@@ -53,6 +53,7 @@ Then follow [docs/day-one.md](docs/day-one.md) for the first week.
 | `glossary.md` · `links.md` | Acronyms and internal names · docs worth finding again |
 | `connectors.md` | The tools your agent can reach, and which writes it may make without asking |
 | `inbox.md` | Anything unsorted |
+| `.claude/skills/council/` | The one bundled skill: say "use the council" and fresh reviewer subagents pick metrics, score the work out of 10 and drive fix rounds (default target 8, at most 3 rounds) |
 
 There's no daily log and no board you update by hand. In my old setup both stopped being updated
 within a few weeks, and git, chat and the ticket tool already record the activity.
